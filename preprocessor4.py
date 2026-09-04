@@ -15,7 +15,7 @@ y = df['diabetes_risk']
 categorical_cols = X.select_dtypes(include='object').columns
 numeric_cols = X.select_dtypes(include=np.number).columns
 
-cat_imputer = SimpleImputer(strategy='constant', fill_value='Unknown')
+cat_imputer = SimpleImputer(strategy='most_frequent')
 X[categorical_cols] = cat_imputer.fit_transform(X[categorical_cols])
 
 num_imputer = SimpleImputer(strategy='mean')
@@ -27,3 +27,21 @@ X = pd.get_dummies(
     drop_first=False,
     dtype=int
 )
+
+from sklearn.feature_selection import RFE
+from sklearn.tree import DecisionTreeClassifier
+
+
+model = DecisionTreeClassifier(random_state=42)
+
+rfe = RFE(
+    estimator=model,
+    n_features_to_select=5,
+    step=1
+)
+
+X = rfe.fit_transform(
+    X,
+    y
+)
+
