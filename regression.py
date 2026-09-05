@@ -73,3 +73,29 @@ for feature, coef in zip(X.columns, reg.coef_):
         formula += f" - {abs(coef):.4f}*{feature}"
 
 print(formula)
+
+# Decision Tree Regressor
+from sklearn.tree import DecisionTreeRegressor
+
+dtr = DecisionTreeRegressor(min_impurity_decrease=0.3, random_state=0)
+dtr.fit(X_train, y_train)
+
+print("dtr")
+print("Decision Tree depth:", dtr.get_depth())
+print("Decision Tree leaves:", dtr.get_n_leaves())
+
+dtr_importance_df = pd.DataFrame({
+    'feature': X.columns,
+    'importance': dtr.feature_importances_
+}).sort_values(by='importance', ascending=False)
+
+top_features = dtr_importance_df.head(10)
+
+plt.figure(figsize=(10, 6))
+plt.barh(top_features['feature'], top_features['importance'])
+plt.xlabel('Feature Importance')
+plt.ylabel('Feature')
+plt.title('Decision Tree Feature Importances')
+plt.gca().invert_yaxis()
+plt.show()
+
