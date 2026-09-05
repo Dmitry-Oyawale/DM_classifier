@@ -50,3 +50,26 @@ dummy_regr.fit(X_train, y_train)
 
 print("\nDummy Regressor")
 print("Predicted BMI:", dummy_regr.constant_[0])
+
+from sklearn.linear_model import LinearRegression
+reg = LinearRegression()
+
+reg.fit(X_train,y_train)
+
+print("coefficients")
+print(reg.coef_)
+
+print("intercept")
+print(reg.intercept_)
+
+print("\nFormula:")
+
+formula = f"BMI = {reg.intercept_:.4f}"
+
+for feature, coef in zip(X.columns, reg.coef_):
+    if coef >= 0:
+        formula += f" + {coef:.4f}*{feature}"
+    else:
+        formula += f" - {abs(coef):.4f}*{feature}"
+
+print(formula)
