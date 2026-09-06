@@ -99,3 +99,29 @@ plt.title('Decision Tree Feature Importances')
 plt.gca().invert_yaxis()
 plt.show()
 
+# Random Forest Regressor
+
+from sklearn.ensemble import RandomForestRegressor
+
+rfr = RandomForestRegressor(n_estimators=100, max_depth=50, random_state=0)
+
+rfr.fit(X_train, y_train)
+
+rf_importance_df = pd.DataFrame({
+    'feature': X.columns,
+    'importance': rfr.feature_importances_
+}).sort_values(by='importance', ascending=False)
+
+print("\nrfr")
+
+print(rf_importance_df.head(10))
+
+top_features = rf_importance_df.head(10)
+
+plt.figure(figsize=(10, 6))
+plt.barh(top_features['feature'], top_features['importance'])
+plt.xlabel('Feature Importance')
+plt.ylabel('Feature')
+plt.title('Random Forest Feature Importances')
+plt.gca().invert_yaxis()
+plt.show()
