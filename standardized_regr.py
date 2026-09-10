@@ -6,9 +6,11 @@ import numpy as np
 import sklearn
 from sklearn.impute import SimpleImputer
 
+
 df = pd.read_csv('diabetes_risk.csv')
 
 df = df.drop(columns=['patient_id'])
+
 
 X = df.drop(columns=['diabetes_risk', 'bmi'])
 y = df['bmi']
@@ -22,12 +24,15 @@ X[categorical_cols] = cat_imputer.fit_transform(X[categorical_cols])
 num_imputer = SimpleImputer(strategy='mean')
 X[numeric_cols] = num_imputer.fit_transform(X[numeric_cols])
 
+
 X = pd.get_dummies(
     X,
     columns=categorical_cols,
     drop_first=False,
     dtype=int
 )
+
+
 
 from sklearn.model_selection import train_test_split
 
@@ -38,6 +43,12 @@ X_train, X_test, y_train, y_test = train_test_split(
     random_state=42
 )
 
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+
+X_train[numeric_cols] = scaler.fit_transform(X_train[numeric_cols])
+X_test[numeric_cols] = scaler.transform(X_test[numeric_cols])
 
 
 
@@ -50,6 +61,8 @@ dummy_regr.fit(X_train, y_train)
 
 print("\nDummy Regressor")
 print("Predicted BMI:", dummy_regr.constant_[0])
+
+# Linear Regression
 
 from sklearn.linear_model import LinearRegression
 reg = LinearRegression()
@@ -77,7 +90,7 @@ print(formula)
 # Decision Tree Regressor
 from sklearn.tree import DecisionTreeRegressor
 
-dtr = DecisionTreeRegressor(min_impurity_decrease=0.3, random_state=0)
+dtr = DecisionTreeRegressor(random_state=0)
 dtr.fit(X_train, y_train)
 
 print("dtr")
@@ -103,7 +116,7 @@ plt.show()
 
 from sklearn.ensemble import RandomForestRegressor
 
-rfr = RandomForestRegressor(n_estimators=100, max_depth=50, random_state=0)
+rfr = RandomForestRegressor(random_state=0)
 
 rfr.fit(X_train, y_train)
 
