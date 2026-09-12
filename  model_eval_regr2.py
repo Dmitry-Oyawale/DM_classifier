@@ -1,17 +1,17 @@
-# Now, use 10-fold stratified cross-validation again but apply 
+# 2.2. Now, use 10-fold cross-validation again but apply 
 # preprocessing to each fold (not to the entire data) before 
-# building the tree.
+# building the tree. Same as you did in Part I above.
 
 
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.impute import SimpleImputer
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.model_selection import StratifiedKFold, cross_validate, cross_val_predict
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.model_selection import StratifiedKFold, KFold, cross_validate, cross_val_predict
 import numpy as np
 import pandas as pd
-from sklearn.metrics import confusion_matrix, classification_report, ConfusionMatrixDisplay
+
 import matplotlib.pyplot as plt
 
 
@@ -20,9 +20,10 @@ df = pd.read_csv('diabetes_risk.csv')
 
 df = df.drop(columns=['patient_id'])
 
-X = df.drop(columns=['diabetes_risk'])
-y = df['diabetes_risk']
+df = df.dropna(subset=['bmi'])
 
+X = df.drop(columns=['bmi'])
+y = df['bmi']
 
 categorical_cols = X.select_dtypes(include='object').columns
 numeric_cols = X.select_dtypes(include=np.number).columns
@@ -47,10 +48,10 @@ preprocessor = ColumnTransformer([
 
 Model = Pipeline([
     ('preprocessor', preprocessor),
-    ('tree', DecisionTreeClassifier(random_state=0))
+    ('tree', DecisionTreeRegressor(random_state=0))
 ])
 
-skf = StratifiedKFold(
+kcv = KFold(
     n_splits=10,
     shuffle=True,
     random_state=0
@@ -61,19 +62,19 @@ cv_scores = cross_validate(
     X,
     y, 
     scoring=[
-        'accuracy',
-        'precision_macro',
-        'recall_macro',
-        'f1_macro'
+        'neg_mean_squared_error', 
+        'neg_root_mean_squared_error', 
+        'neg_mean_absolute_error', 
+        'r2'
     ],
-    cv=skf
+    cv=kcv
 )
 
 metrics = [
-    'test_accuracy',
-    'test_precision_macro',
-    'test_recall_macro',
-    'test_f1_macro'
+    'test_neg_mean_squared_error', 
+    'test_neg_root_mean_squared_error', 
+    'test_neg_mean_absolute_error', 
+    'test_r2'
 ]
 
 for metric in metrics:
@@ -84,15 +85,4 @@ for metric in metrics:
     print()
 
 # If you need to generate predictions on each test fold
-y_pred = cross_val_predict(Model, X, y, cv=skf)
-print(classification_report(y, y_pred))
-
-CM = confusion_matrix(y, y_pred)
-print(CM)
-
-# Visualizing the confusion matrix
-
-CMviz = ConfusionMatrixDisplay(confusion_matrix=CM, display_labels=['Low', 'Moderate', 'High'])
-CMviz.plot(cmap='Greens')
-
-plt.show()
+y_pred = cross_val_predict(Model, X, y, cv=kcv)

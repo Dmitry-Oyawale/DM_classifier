@@ -76,5 +76,31 @@ cv_scores = cross_validate(Model, X, y, scoring=['accuracy', 'precision_macro', 
 
 print("StratifiedK-fold scores of each fold: ", cv_scores)
 
+#include results (mean and standard deviation) in report
+metrics = [
+    'test_accuracy',
+    'test_precision_macro',
+    'test_recall_macro',
+    'test_f1_macro'
+]
+
+for metric in metrics:
+    print(metric)
+    print(cv_scores[metric])
+    print("Mean:", cv_scores[metric].mean())
+    print("Standard deviation:", cv_scores[metric].std())
+    print()
+
 # If you need to generate predictions on each test fold
 y_pred = cross_val_predict(Model, X, y, cv=skf)
+print(classification_report(y, y_pred))
+
+CM = confusion_matrix(y, y_pred)
+print(CM)
+
+# Visualizing the confusion matrix
+
+CMviz = ConfusionMatrixDisplay(confusion_matrix=CM, display_labels=['Low', 'Moderate', 'High'])
+CMviz.plot(cmap='Greens')
+
+plt.show()
